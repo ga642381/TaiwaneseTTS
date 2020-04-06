@@ -1,0 +1,4 @@
+__pycache__/
+checkpoints/
+model_outputs/
+*_back
