@@ -1,14 +1,16 @@
 from PyQt5.QtWidgets import QMainWindow,QApplication
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QObject, pyqtSignal
 from log_v import LogV
 from trans_vc import TransVC
+from tts_vc import TTSVC
 import sys
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setObjectName("TTS_Window")
-        self.setWindowTitle("TTS Window")
+        self.setWindowTitle("台語 TTS")
         self.resize(1150, 762)
         self.setupUi()
         
@@ -17,6 +19,9 @@ class MainWindow(QMainWindow):
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
+        
+        ## Signal Sharing##
+        self.bridge = Bridge()
         
         ## Trans Frame ##
         self.trans_frame = QtWidgets.QFrame(self.centralwidget)
@@ -27,7 +32,7 @@ class MainWindow(QMainWindow):
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         
-        self.trans_widget = TransVC()
+        self.trans_widget = TransVC(self.bridge)
         self.trans_widget.setObjectName("trans_widget")
         
         self.verticalLayout_2.addWidget(self.trans_widget)
@@ -43,9 +48,8 @@ class MainWindow(QMainWindow):
         
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.tts_frame)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
         
-        self.tts_widget = LogV()
+        self.tts_widget = TTSVC(self.bridge)
         self.tts_widget.setObjectName("tts_widget")
         
         self.verticalLayout_3.addWidget(self.tts_widget)
@@ -63,7 +67,7 @@ class MainWindow(QMainWindow):
         self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         
-        self.log_widget = LogV()
+        self.log_widget = LogV(self.bridge)
         self.log_widget.setObjectName("log_widget")
         
         self.verticalLayout.addWidget(self.log_widget)
@@ -96,7 +100,16 @@ class MainWindow(QMainWindow):
     def onExit(self):
         self.trans_widget.removeDocker()
 
-
+class Bridge(QObject):
+    valueUpdated = pyqtSignal()
+    def __init__(self):
+        super().__init__()
+        self.IPA_text = ""
+        
+    def sendSignal(self, text):
+        self.IPA_text = text
+        self.valueUpdated.emit()
+    
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

@@ -4,8 +4,11 @@ from datetime import datetime
 
 
 class LogV(QWidget):
-    def __init__(self):
+    def __init__(self, bridge):
         super(QWidget, self).__init__()
+        
+        self.bridge = bridge
+        
         self.log_box = QPlainTextEdit()
         self.log_box.setReadOnly(True)
         

@@ -152,7 +152,16 @@ if __name__ == "__main__":
             v_type = 'wavernn_unbatched'
 
         if input_text:
-            save_path = paths.tts_output/f'__input_{input_text[:10]}_{v_type}_{tts_k}k.wav'
+            tmp = input_text.split()
+            output_name_list = []
+            for s in tmp:
+                if s != "," and s != ".":
+                    output_name_list.append(s)
+                else:
+                    break
+            output_name = " ".join(output_name_list)
+            save_path = "../output/{}.wav".format(output_name)
+            #save_path = paths.tts_output/f'__input_{input_text[:10]}_{v_type}_{tts_k}k.wav'
         else:
             save_path = paths.tts_output/f'{i}_{v_type}_{tts_k}k.wav'
 

@@ -10,11 +10,14 @@ from 臺灣言語工具.翻譯.摩西工具.語句編碼器 import 語句編碼�
 from 臺灣言語工具.語音合成 import 台灣話口語講法
 
 class TransVC(QWidget):
-    def __init__(self):
+    def __init__(self, bridge):
         super(QWidget, self).__init__()
+        
+        self.bridge = bridge
+        
         self.Chinese_text = QtWidgets.QPlainTextEdit()
         self.trans_button = QtWidgets.QPushButton()
-        self.trans_button.clicked.connect(self.trans_button_onclicked)
+        self.trans_button.clicked.connect(self.transOnClicked)
         self.text_1 = QtWidgets.QLineEdit()
         self.text_2 = QtWidgets.QLineEdit()
         self.text_3 = QtWidgets.QLineEdit()
@@ -40,24 +43,32 @@ class TransVC(QWidget):
     def removeDocker(self):
         self.client.containers.get("huatai").stop()
         
-    def trans_button_onclicked(self):
+    def translate(self, text):
+        華語句物件 = 拆文分析器.建立句物件(text)
+        華語斷詞句物件 = 國教院斷詞用戶端.斷詞(華語句物件)
+        台語句物件, self.華語新結構句物件, 分數 = (摩西用戶端(位址='localhost', 編碼器=語句編碼器).翻譯分析(華語斷詞句物件))
+        口語講法 = 台灣話口語講法(台語句物件)
+        
+        return 華語斷詞句物件, 台語句物件, 口語講法
+    
+    
+    def transOnClicked(self):
+        # translate
         Chinese_text = self.Chinese_text.toPlainText()
-        print(Chinese_text)
-        self.華語句物件 = 拆文分析器.建立句物件(Chinese_text)
-        # send the text to 
-        self.華語斷詞句物件 = 國教院斷詞用戶端.斷詞(self.華語句物件)
+        self.華語斷詞句物件, self.台語句物件, self.口語講法 = self.translate(Chinese_text)
+        
+        # setText
         self.text_1.setText(self.華語斷詞句物件.看分詞())
-        # send the text to docker "huatai"
-        self.台語句物件, self.華語新結構句物件, 分數 = (摩西用戶端(位址='localhost', 編碼器=語句編碼器).翻譯分析(self.華語斷詞句物件))
         self.text_2.setText(self.台語句物件.看型())
         self.text_3.setText(self.台語句物件.看音())
-        self.口語講法 = 台灣話口語講法(self.台語句物件)
         self.IPA_text.setText(self.口語講法)
+        
+        # send IPA text to tts_widget
+        self.bridge.sendSignal(self.IPA_text.text())
         
         
     def setupUi(self):
         self.setObjectName("trans_vc")
-        self.setObjectName("widget")
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.setSizePolicy(sizePolicy)
         
@@ -193,7 +204,7 @@ class TransVC(QWidget):
         self.verticalLayout_3.setStretch(1, 2)
         
         
-        self.Chinese_text.setPlainText("今天天氣好嗎\n")
+        self.Chinese_text.setPlainText("最近肺炎很嚴重，記得戴口罩，常洗手。有病就要看醫生。")
         self.trans_button.setText("翻譯")
         self.label_1.setText("斷詞")
         self.label_2.setText("臺語")
