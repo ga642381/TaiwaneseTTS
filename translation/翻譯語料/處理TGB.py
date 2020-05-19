@@ -5,12 +5,12 @@ TGB_華 = "./TGB/TGB_華語"
 TGB_閩 = "./TGB/TGB_閩南語"
 
 SYMBOLS = ['~', "'", '+', '[',
-           '\\', '@', '^', '{', 
-            '-', '"', '*', '|', 
+           '\\', '@', '^', '{',
+            '-', '"', '*', '|',
             '&', '<', '`', '}',
-            '_', '=', ']',  '>', 
-            '#', '$', '/', '...',''
-            '』', '『 ']
+            '_', '=', ']', '>',
+            '#', '$', '/', '...',
+            '』', '『']
             
 with open(TGB_華, "r") as f:
     華 = f.readlines()
@@ -79,8 +79,8 @@ for i, l in enumerate(華) :
             l = l.replace("「 ", "")
             l = l.replace("」 ", "")
             
-    if l[-2] == "," or l[-2] == "，":
-        l = l[:-2] +  "。\n"
+    #if l[-2] == "," or l[-2] == "，":
+    #    l = l[:-2] +  "。\n"
     
     華_.append(l)
     
@@ -109,17 +109,24 @@ for i, l in enumerate(閩_tmp) :
     l = l.replace("；", ";")
     l = l.replace("、", ",")
     l = l.replace("！", "!")
-    if l[-2] == "," or l[-2] == "，":
-        l = l[:-2] +  ".\n"
+    l = l.replace("：", ":")
+    l = l.replace("『", "\'")
+    l = l.replace("』", "\'")
+    #if l[-2] == "," or l[-2] == "，":
+    #    l = l[:-2] +  ".\n"
     閩_.append(l)
     
 閩_ =  [j for i, j in enumerate(閩_) if i not in to_remove_index]
 華_ =  [j for i, j in enumerate(華_) if i not in to_remove_index]
 
-with open("./TGB_華", "w") as f:
+out_華 = "./tmp/TGB_華"
+out_閩 = "./tmp/TGB_閩"
+with open(out_華, "w") as f:
+    print(out_華)
     f.writelines(華_)
 
-with open("./TGB_閩", "w") as f:
+with open(out_閩, "w") as f:
+    print(out_閩)
     f.writelines(閩_)
             
             
