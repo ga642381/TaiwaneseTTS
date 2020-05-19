@@ -72,9 +72,9 @@ def test(model, dataloader, loss_function):
 
         # 將預測結果轉為文字
         targets = targets.view(sources.size(0), -1)
-        preds = tokens2sentence(preds, dataloader.dataset.int2word_cn)
-        sources = tokens2sentence(sources, dataloader.dataset.int2word_en)
-        targets = tokens2sentence(targets, dataloader.dataset.int2word_cn)
+        preds = tokens2sentence(preds, dataloader.dataset.int2word_閩)
+        sources = tokens2sentence(sources, dataloader.dataset.int2word_華)
+        targets = tokens2sentence(targets, dataloader.dataset.int2word_閩)
         for source, pred, target in zip(sources, preds, targets):
             result.append((source, pred, target))
         # 計算 Bleu Score
@@ -134,7 +134,7 @@ def test_process(config):
     test_loader = data.DataLoader(test_dataset, batch_size=1)
     # 建構模型
     model, optimizer = build_model(
-        config, test_dataset.en_vocab_size, test_dataset.cn_vocab_size)
+        config, test_dataset.en_vocab_size, test_dataset.閩_vocab_size)
     print("Finish build model")
     loss_function = nn.CrossEntropyLoss(ignore_index=0)
     model.eval()
