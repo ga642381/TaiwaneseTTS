@@ -5,7 +5,7 @@ import nltk
 from nltk.translate.bleu_score import sentence_bleu
 from nltk.translate.bleu_score import SmoothingFunction
 
-
+smoothie = SmoothingFunction().method4
 def computebleu(sentences, targets):
     score = 0
     assert (len(sentences) == len(targets))
@@ -22,7 +22,7 @@ def computebleu(sentences, targets):
     for sentence, target in zip(sentences, targets):
         sentence = cut_token(sentence)
         target = cut_token(target)
-        score += sentence_bleu([target], sentence, weights=(1, 0, 0, 0))
+        score += sentence_bleu([target], sentence, weights=(1, 0, 0, 0), smoothing_function=smoothie)
 
     return score
 

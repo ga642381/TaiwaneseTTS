@@ -1,4 +1,5 @@
 __pycache__/
 checkpoints/
+ckpt/
 model_outputs/
 *_back
