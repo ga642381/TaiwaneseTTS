@@ -10,7 +10,7 @@ SYMBOLS = ['~', "'", '+', '[',
             '&', '<', '`', '}',
             '_', '=', ']', '>',
             '#', '$', '/', '...',
-            '』', '『']
+            '』', '『','／']
             
 with open(TGB_華, "r") as f:
     華 = f.readlines()
@@ -39,6 +39,8 @@ def to_pingin(閩):
             else:
                 join_elms.append(t)        
         l = " ".join(join_elms)
+        # char:
+        l = l.replace("-", " ")
         l = l + "\n"
         閩_tmp.append(l)
     return 閩_tmp
@@ -49,7 +51,6 @@ def to_pingin(閩):
 閩_ = []
 to_remove_lines = []
 to_remove_index = []
-k = 0
 ##=============== 華 ===============##
 for i, l in enumerate(華) :
     for s in SYMBOLS:
@@ -78,14 +79,22 @@ for i, l in enumerate(華) :
         if l.index("」") < l.index("「"):
             l = l.replace("「 ", "")
             l = l.replace("」 ", "")
-            
-    #if l[-2] == "," or l[-2] == "，":
-    #    l = l[:-2] +  "。\n"
     
-    華_.append(l)
+    l_ = []
+    for i, c in enumerate(l):
+        l_.append(c)
+        
+        if i == len(l) -1:
+            break        
+        
+        if l[i+1] != " " and c!= " ":
+            l_.append(" ")
+    l_ = "".join(l_)
+    l_ = l_.rstrip()
+    
+    華_.append(l_)
     
 ##=============== 閩 ===============##
-K_ = 0
 for i, l in enumerate(閩_tmp) :
     l = l.replace("“","「")
     l = l.replace("”","」")    
@@ -112,25 +121,27 @@ for i, l in enumerate(閩_tmp) :
     l = l.replace("：", ":")
     l = l.replace("『", "\'")
     l = l.replace("』", "\'")
-    #if l[-2] == "," or l[-2] == "，":
-    #    l = l[:-2] +  ".\n"
+    l = l.rstrip()
     閩_.append(l)
     
 閩_ =  [j for i, j in enumerate(閩_) if i not in to_remove_index]
 華_ =  [j for i, j in enumerate(華_) if i not in to_remove_index]
+assert( len(閩_) == len(華_))
 
 out_華 = "./tmp/TGB_華"
 out_閩 = "./tmp/TGB_閩"
 with open(out_華, "w") as f:
-    print(out_華)
-    f.writelines(華_)
-
+    for line in 華_:
+        f.write(line)
+        f.write("\n")
+    print(f.name)
+    
 with open(out_閩, "w") as f:
-    print(out_閩)
-    f.writelines(閩_)
-            
-            
-            
+    for line in 閩_:
+        f.write(line)
+        f.write("\n")
+    print(f.name)        
+
             
             
             
