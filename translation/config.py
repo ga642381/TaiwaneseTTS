@@ -6,7 +6,7 @@ class configurations(object):
     def __init__(self):
         self.batch_size = 60
         self.emb_dim = 128
-        self.hid_dim = 256
+        self.hid_dim = 64
         self.n_layers = 3
         self.dropout = 0.5
         self.learning_rate = 0.00005

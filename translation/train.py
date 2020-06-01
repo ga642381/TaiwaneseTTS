@@ -31,6 +31,8 @@ def train(model, optimizer, train_iter, loss_function, total_steps, summary_step
     loss_sum = 0.0
     for step in range(summary_steps):
         sources, targets = next(train_iter)
+        #print("sources", sources)
+        #print("targets", targets)
         sources, targets = sources.to(device), targets.to(device)
         outputs, preds = model(sources, targets, schedule_sampling())
         # targets 的第一個 token 是 <BOS> 所以忽略
