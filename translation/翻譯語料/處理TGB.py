@@ -51,6 +51,7 @@ def to_pingin(閩):
 閩_ = []
 to_remove_lines = []
 to_remove_index = []
+eng_num_words = []
 ##=============== 華 ===============##
 for i, l in enumerate(華) :
     for s in SYMBOLS:
@@ -80,6 +81,18 @@ for i, l in enumerate(華) :
             l = l.replace("「 ", "")
             l = l.replace("」 ", "")
     
+    # === find english and numbers === #
+    for token in l.split():
+        # english words
+        if re.findall(r'[a-zA-z0-9]', token):
+            chinese = re.findall(r'[\u4e00-\u9fff]', token)
+            if chinese:
+                for c in chinese:
+                    token = token.replace(c, "")
+            eng_num_words.append((i, token))
+            
+    # ================================ #
+    
     l_ = []
     for i, c in enumerate(l):
         l_.append(c)
@@ -91,9 +104,8 @@ for i, l in enumerate(華) :
             l_.append(" ")
     l_ = "".join(l_)
     l_ = l_.rstrip()
-    
     華_.append(l_)
-    
+##=============== 華 ===============##
 ##=============== 閩 ===============##
 for i, l in enumerate(閩_tmp) :
     l = l.replace("“","「")
@@ -122,8 +134,15 @@ for i, l in enumerate(閩_tmp) :
     l = l.replace("『", "\'")
     l = l.replace("』", "\'")
     l = l.rstrip()
-    閩_.append(l)
     
+    閩_.append(l)
+# === replace english number words === #
+for line, eng_num in eng_num_words:
+    if eng_num in 閩_[line]:
+        閩_[line] = 閩_[line].replace(eng_num, " ".join(eng_num))
+##=============== 閩 ===============##
+
+
 閩_ =  [j for i, j in enumerate(閩_) if i not in to_remove_index]
 華_ =  [j for i, j in enumerate(華_) if i not in to_remove_index]
 assert( len(閩_) == len(華_))

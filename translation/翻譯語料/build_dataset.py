@@ -5,7 +5,7 @@ import json
 
 # ===== 華 =====#
 words = {}
-with open('華', 'r') as f:
+with open('./tmp/華', 'r') as f:
     for line in f:
         line = re.split('[ \n\t\r ]', line)
         line = list(filter(None, line))
@@ -31,7 +31,7 @@ with open("../data/int2word_華.json", "w") as f:
     
 # ===== 閩 =====#
 words = {}
-with open('閩', 'r') as f:
+with open('./tmp/閩', 'r') as f:
     for line in f:
         line = re.split('[ \n\t\r ]', line)
         line = list(filter(None, line))

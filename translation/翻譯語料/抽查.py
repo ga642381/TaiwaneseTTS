@@ -9,10 +9,10 @@ if __name__ == '__main__':
     else:
         number = 1
     
-    with open("./華", 'r') as f:
+    with open("./tmp/華", 'r') as f:
         華 = f.readlines()
     
-    with open("./閩", 'r') as f:
+    with open("./tmp/閩", 'r') as f:
         閩 = f.readlines()
         
     for _ in range(number):

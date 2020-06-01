@@ -8,5 +8,16 @@
 2. TGB_閩南語 : https://github.com/sih4sing5hong5/huan1-ik8_gian2-kiu3/tree/master/%E8%AA%9E%E6%96%99/TGB/對齊平行閩南語
 
 
+## 處理資料
+1. python 處理icorpus.py
+2. python 處理TGB.py
 
+資料會放進 tmp 資料夾內
 
+3. python gen_data.py
+
+產生 training, testing, validation data
+資料會放進 data 資料夾內
+
+4. python build_dataset.py
+資料會放進 tmp 資料夾內

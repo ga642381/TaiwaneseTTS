@@ -22,8 +22,8 @@ for d in data_types:
     with open(file, 'r') as f:
         閩 +=  f.readlines()
 
-out_華 = './華'
-out_閩 = './閩'
+out_華 = tmp_dir + '/華'
+out_閩 = tmp_dir + '/閩'
 with open(out_華, "w") as f:
     print(out_華)
     f.writelines(華)
