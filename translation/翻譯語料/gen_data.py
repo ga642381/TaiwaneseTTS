@@ -22,15 +22,29 @@ for d in data_types:
     with open(file, 'r') as f:
         閩 +=  f.readlines()
 
+# ====================== 處理太長的句子 ==================#
+too_long_index = []
+for i, line in enumerate(華):
+    if len(line.split()) > 95:
+        too_long_index.append(i)
+        
+for i, line in enumerate(閩):
+    if len(line.split()) > 95:
+        too_long_index.append(i)
+
+閩 =  [j for i, j in enumerate(閩) if i not in too_long_index]
+華 =  [j for i, j in enumerate(華) if i not in too_long_index]
+
 out_華 = tmp_dir + '/華'
 out_閩 = tmp_dir + '/閩'
 with open(out_華, "w") as f:
-    print(out_華)
-    f.writelines(華)
+    for line in 華:
+        f.write(line)
 
 with open(out_閩, "w") as f:
-    print(out_閩)
-    f.writelines(閩)
+    for line in 閩:
+        f.write(line)
+
     
 # =============== Split ================ #
 華閩 = []
