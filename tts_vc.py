@@ -34,7 +34,7 @@ class TTSVC(QWidget):
         selected_model_index = self.listView.selectedIndexes()[0]
         wav_name = self.fileModel.fileName(selected_model_index)
         print(wav_name)
-        os.system("play ./output/'{}'".format(wav_name))
+        os.system("sox ./output/'{}'".format(wav_name))
         
     def getIPAtext(self):
         self.IPA_text.setPlainText(self.bridge.IPA_text)

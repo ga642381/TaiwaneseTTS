@@ -45,12 +45,18 @@ random.seed(SEED)
 random.shuffle(華閩)
 
 train_len = 100000
-test_len = 10000
-val_len = 2748
+test_len = 12248
+#val_len = 2748
+val_len = 500
 
 train_華閩 = 華閩[:train_len]
-test_華閩 = 華閩[train_len:train_len + test_len]
-val_華閩 = 華閩[train_len + test_len :]
+test_華閩 = 華閩[train_len:-val_len]
+val_華閩 = 華閩[-val_len:]
+
+print("len train :{}".format(len(train_華閩)))
+print("len test  :{}".format(len(test_華閩 )))
+print("len val   :{}".format(len(val_華閩  )))
+
 
 with open(out_train, "w") as f:
     print(out_train)

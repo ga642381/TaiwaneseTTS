@@ -61,6 +61,7 @@ def test(model, dataloader, loss_function):
     loss_sum, bleu_score = 0.0, 0.0
     n = 0
     result = []
+    print(len(dataloader))
     for sources, targets in dataloader:
         sources, targets = sources.to(device), targets.to(device)
         batch_size = sources.size(0)
@@ -81,7 +82,6 @@ def test(model, dataloader, loss_function):
             result.append((source, pred, target))
         # 計算 Bleu Score
         bleu_score += computebleu(preds, targets)
-
         n += batch_size
 
     return loss_sum / len(dataloader), bleu_score / n, result
