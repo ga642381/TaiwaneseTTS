@@ -1,6 +1,7 @@
 總共使用兩種華臺語料
-1.TGB通訊
-2.iCorpus台華平行新聞語料庫
+1.iCorpus台華平行新聞語料庫
+2.TGB通訊
+
 
 ## TGB
 原始資料:
@@ -9,7 +10,8 @@
 
 
 ## 處理資料
-1. python 處理icorpus.py
+1.1. python 轉臺羅icorpus.py
+1.2. python 處理icorpus.py
 2. python 處理TGB.py
 
 資料會放進 tmp 資料夾內
@@ -20,4 +22,4 @@
 資料會放進 data 資料夾內
 
 4. python build_dataset.py
-資料會放進 tmp 資料夾內
+資料會放進 data 資料夾內

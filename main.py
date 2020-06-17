@@ -1,7 +1,6 @@
 import sys
 from PyQt5 import QtWidgets
 from main_window import MainWindow
-
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     TTS_MainWindow = MainWindow()
@@ -11,4 +10,5 @@ if __name__ == '__main__':
     try:
         sys.exit(app.exec_())
     except:
-        TTS_MainWindow.onExit()
+        pass
+        #TTS_MainWindow.onExit()

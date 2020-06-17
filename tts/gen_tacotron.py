@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from models.fatchord_version import WaveRNN
 from utils import hparams as hp
@@ -8,7 +9,7 @@ import argparse
 from utils.text import text_to_sequence
 from utils.display import save_attention, simple_table
 from utils.dsp import reconstruct_waveform, save_wav
-import numpy as np
+
 
 if __name__ == "__main__":
 

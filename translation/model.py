@@ -230,39 +230,43 @@ class Seq2Seq(nn.Module):
         preds = torch.cat(preds, 1)
         return outputs, preds
 
-    def inference(self, input, target):
+    def inference(self, source):
         ########
         # TODO #
         ########
         # 在這裡實施 Beam Search
         # 此函式的 batch size = 1
-        # input  = [batch size, input len, vocab size]
+        # source  = [batch size, source len, vocab size]
         # target = [batch size, target len, vocab size]
-        batch_size = input.shape[0]
-        input_len = input.shape[1]        # 取得最大字數
+        batch_size = source.shape[0]
+        source_len = source.shape[1]        # 取得最大字數
         vocab_size = self.decoder.閩_vocab_size
 
         # 準備一個儲存空間來儲存輸出
-        outputs = torch.zeros(batch_size, input_len,
+        outputs = torch.zeros(batch_size, source_len,
                               vocab_size).to(self.device)
         # 將輸入放入 Encoder
-        encoder_outputs, hidden = self.encoder(input)
+        encoder_outputs, hidden = self.encoder(source)
         # Encoder 最後的隱藏層(hidden state) 用來初始化 Decoder
         # encoder_outputs 主要是使用在 Attention
         # 因為 Encoder 是雙向的RNN，所以需要將同一層兩個方向的 hidden state 接在一起
         # hidden =  [num_layers * directions, batch size  , hid dim]  --> [num_layers, directions, batch size  , hid dim]
         hidden = hidden.view(self.encoder.n_layers, 2, batch_size, -1)
         hidden = torch.cat((hidden[:, -2, :, :], hidden[:, -1, :, :]), dim=2)
+        
+        
         # 取的 <BOS> token
-        input = target[:, 0]
+        # input is just tensor([1], device='cuda:0')
+        # input = target[:, 0] 
+        d_input = source[:, 0]
         preds = []
-        for t in range(1, input_len): #time step
-            output, hidden = self.decoder(input, hidden, encoder_outputs)
+        for t in range(1, source_len): #time step
+            output, hidden = self.decoder(d_input, hidden, encoder_outputs)
             # 將預測結果存起來
             outputs[:, t] = output
             # 取出機率最大的單詞
             top1 = output.argmax(1)
-            input = top1
+            d_input = top1
             preds.append(top1.unsqueeze(1))
         preds = torch.cat(preds, 1)
         return outputs, preds
@@ -277,7 +281,7 @@ def save_model(model, optimizer, store_model_path, step):
 
 def load_model(model, load_model_path):
     print(f'Load model from {load_model_path}')
-    model.load_state_dict(torch.load(f'{load_model_path}.ckpt'))
+    model.load_state_dict(torch.load(f'{load_model_path}'))
     return model
 
 
@@ -288,10 +292,10 @@ def build_model(config, 華_vocab_size, 閩_vocab_size, device):
     decoder = Decoder(閩_vocab_size, config.emb_dim, config.hid_dim,
                       config.n_layers, config.dropout, config.attention)
     model = Seq2Seq(encoder, decoder, device)
-    print(model)
+    #print(model)
     # 建構 optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
-    print(optimizer)
+    #print(optimizer)
     if config.load_model:
         model = load_model(model, config.load_model_path)
     model = model.to(device)

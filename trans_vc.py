@@ -1,7 +1,8 @@
+import os
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QLabel
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from translation.main import translate_seq2seq
 from 臺灣言語工具.解析整理.拆文分析器 import 拆文分析器
 from 臺灣言語工具.斷詞.國教院斷詞用戶端 import 國教院斷詞用戶端
 from 臺灣言語工具.翻譯.摩西工具.摩西服務端 import 摩西服務端
@@ -42,7 +43,13 @@ class TransVC(QWidget):
         
     def removeDocker(self):
         self.client.containers.get("huatai").stop()
-        
+    
+    def translate_deep(self, text):
+        拼音 = translate_seq2seq(text)
+        句物件 = 拆文分析器.建立句物件(拼音, 拼音)
+        口語講法 = 台灣話口語講法(句物件)
+        return 拼音, 口語講法
+    
     def translate(self, text):
         華語句物件 = 拆文分析器.建立句物件(text)
         華語斷詞句物件 = 國教院斷詞用戶端.斷詞(華語句物件)
@@ -54,17 +61,23 @@ class TransVC(QWidget):
     
     def transOnClicked(self):
         # translate
+        os.chdir("translation")
         Chinese_text = self.Chinese_text.toPlainText()
         self.華語斷詞句物件, self.台語句物件, self.口語講法 = self.translate(Chinese_text)
-        
+        self.台語Seq2Seq, self.台語IPA = self.translate_deep(Chinese_text)
         # setText
-        self.text_1.setText(self.華語斷詞句物件.看分詞())
-        self.text_2.setText(self.台語句物件.看型())
+        # self.text_1.setText(self.華語斷詞句物件.看分詞())
+        print(self.台語Seq2Seq)
+        self.text_1.setText(self.台語Seq2Seq)
+        self.text_2.setText(self.台語IPA)
+        
         self.text_3.setText(self.台語句物件.看音())
         self.IPA_text.setText(self.口語講法)
         
         # send IPA text to tts_widget
-        self.bridge.sendSignal(self.IPA_text.text())
+        #self.bridge.sendSignal(self.IPA_text.text())
+        self.bridge.sendSignal(self.text_2.text())
+        os.chdir("..")
         
         
     def setupUi(self):
@@ -206,9 +219,9 @@ class TransVC(QWidget):
         
         self.Chinese_text.setPlainText("最近肺炎很嚴重，記得戴口罩，常洗手。有病就要看醫生。")
         self.trans_button.setText("翻譯")
-        self.label_1.setText("斷詞")
-        self.label_2.setText("臺語")
-        self.label_3.setText("拼音")
+        self.label_1.setText("Seq")
+        self.label_2.setText("IPA")
+        self.label_3.setText("摩西")
         self.IPA_label.setText("IPA")
         
         QtCore.QMetaObject.connectSlotsByName(self)

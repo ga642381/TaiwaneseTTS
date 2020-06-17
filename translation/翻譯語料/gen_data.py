@@ -58,9 +58,9 @@ SEED = 40666888
 random.seed(SEED)
 random.shuffle(華閩)
 
-train_len = 100000
-test_len = 12248
-#val_len = 2748
+# total 110995
+train_len = 110000
+test_len = 495
 val_len = 500
 
 train_華閩 = 華閩[:train_len]

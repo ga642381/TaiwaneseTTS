@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 import re
 icorpus_華 = './icorpus/華' 
-icorpus_閩 = './icorpus/閩'
+icorpus_閩 = './icorpus/閩_臺羅'
+out_華 = './tmp/icorpus_華' 
+out_閩 = './tmp/icorpus_閩'
 
 with open(icorpus_華, "r") as f:
     華 = f.readlines()
@@ -11,6 +13,7 @@ with open(icorpus_閩, "r") as f:
     閩 = f.readlines()
 
 eng_num_words = []
+to_remove_index = []
 ##=============== 華 ===============##
 for i, l in enumerate(華):
     l = l.replace("-", " ")
@@ -74,9 +77,24 @@ for i, l in enumerate(閩):
 for line, eng_num in eng_num_words:
     if eng_num in 閩[line]:
         閩[line] = 閩[line].replace(eng_num, " ".join(eng_num))
+
+
+for i, line in enumerate(閩):
+    tokens = line.split()
+    for token in tokens:
+        if not (re.findall(r'[a-zA-Z]', token) and re.findall(r'[0-9]', token)):
+            if len(token)!=1:
+                to_remove_index.append(i)
+                
+        if len(token) > 1:
+            if not re.findall(r'[a-z]', token[0]):
+                to_remove_index.append(i)
+                
+閩 =  [j for i, j in enumerate(閩) if i not in to_remove_index]
+華 =  [j for i, j in enumerate(華) if i not in to_remove_index]
+assert( len(閩) == len(華))
+
 ##=============== 閩 ===============##
-out_華 = './tmp/icorpus_華' 
-out_閩 = './tmp/icorpus_閩'
 with open(out_華, "w") as f:
     for line in 華:
         f.write(line)

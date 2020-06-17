@@ -9,15 +9,18 @@ import torch.utils.data.sampler as sampler
 import torchvision
 from torchvision import datasets, transforms
 
-from model import save_model, load_model, build_model
-from dataset import 華閩Dataset
-from util import computebleu, schedule_sampling, tokens2sentence, infinite_iter
-
 import numpy as np
 import sys
 import os
 import random
 import json
+
+
+from .model import save_model, load_model, build_model
+from .dataset import 華閩Dataset
+from .util import computebleu, schedule_sampling, tokens2sentence, infinite_iter
+
+
 
 
 device = torch.device("cuda" if torch.cuda.is_available()
@@ -56,36 +59,58 @@ def train(model, optimizer, train_iter, loss_function, total_steps, summary_step
     return model, optimizer, losses
 
 
-def test(model, dataloader, loss_function):
+def test(model, dataloader, mode):
     model.eval()
-    loss_sum, bleu_score = 0.0, 0.0
+    if mode =='testing':
+        loss_function = nn.CrossEntropyLoss(ignore_index=0)
+        loss_sum, bleu_score = 0.0, 0.0
     n = 0
     result = []
-    print(len(dataloader))
+    #print(len(dataloader))
     for sources, targets in dataloader:
         sources, targets = sources.to(device), targets.to(device)
+        # sources.shape : torch.Size([1, 100])
+        # targets.shape : torch.Size([1, 100])
+        '''sources:
+        tensor([[  1,  16,  43,  94, 452, 125,   2,   0,   0,   0,   0,   0,   0,   0,
+           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+           0,   0]], device='cuda:0')
+        '''
+        
         batch_size = sources.size(0)
-        outputs, preds = model.inference(sources, targets)
-        # targets 的第一個 token 是 <BOS> 所以忽略
-        outputs = outputs[:, 1:].reshape(-1, outputs.size(2))
-        targets = targets[:, 1:].reshape(-1)
+        outputs, preds = model.inference(sources)
+        
 
-        loss = loss_function(outputs, targets)
-        loss_sum += loss.item()
+        if mode == 'testing':
+            # targets 的第一個 token 是 <BOS> 所以忽略
+            outputs = outputs[:, 1:].reshape(-1, outputs.size(2))
+            targets = targets[:, 1:].reshape(-1)
+            loss = loss_function(outputs, targets)
+            loss_sum += loss.item()
+            # 將預測結果轉為文字
+            targets = targets.view(sources.size(0), -1)
+            preds = tokens2sentence(preds, dataloader.dataset.int2word_閩)
+            sources = tokens2sentence(sources, dataloader.dataset.int2word_華)
+            targets = tokens2sentence(targets, dataloader.dataset.int2word_閩)
+            for source, pred, target in zip(sources, preds, targets):
+                result.append((source, pred, target))
+            # 計算 Bleu Score
+            bleu_score += computebleu(preds, targets)
+            n += batch_size
+            return loss_sum / len(dataloader), bleu_score / n, result
 
-        # 將預測結果轉為文字
-        targets = targets.view(sources.size(0), -1)
-        preds = tokens2sentence(preds, dataloader.dataset.int2word_閩)
-        sources = tokens2sentence(sources, dataloader.dataset.int2word_華)
-        targets = tokens2sentence(targets, dataloader.dataset.int2word_閩)
-        for source, pred, target in zip(sources, preds, targets):
-            result.append((source, pred, target))
-        # 計算 Bleu Score
-        bleu_score += computebleu(preds, targets)
-        n += batch_size
+        elif mode == 'deploy':
+            preds = tokens2sentence(preds, dataloader.dataset.int2word_閩)
+            # return a list
+            return preds[0]
+            
 
-    return loss_sum / len(dataloader), bleu_score / n, result
-
+    
 
 def train_process(config):
     # 準備訓練資料
@@ -129,23 +154,34 @@ def train_process(config):
     return train_losses, val_losses, bleu_scores
 
 
-def test_process(config):
-    # 準備測試資料
-    test_dataset = 華閩Dataset(
-        config.data_path, config.max_output_len, 'testing')
+def inference(config, source):
+    test_dataset = 華閩Dataset(config.data_path, config.max_output_len, 'deploy', source)
     test_loader = data.DataLoader(test_dataset, batch_size=1)
     # 建構模型
     model, optimizer = build_model(
-        config, test_dataset.en_vocab_size, test_dataset.閩_vocab_size)
+        config, test_dataset.華_vocab_size, test_dataset.閩_vocab_size, device)
     print("Finish build model")
-    loss_function = nn.CrossEntropyLoss(ignore_index=0)
+    model.eval()
+    result = test(model, test_loader, mode='deploy')
+    return result
+    
+    
+    
+def test_process(config):
+    # 準備測試資料
+    test_dataset = 華閩Dataset(config.data_path, config.max_output_len, 'testing')
+    test_loader = data.DataLoader(test_dataset, batch_size=1)
+    # 建構模型
+    model, optimizer = build_model(
+        config, test_dataset.華_vocab_size, test_dataset.閩_vocab_size, device)
+    print("Finish build model")
     model.eval()
     # 測試模型
-    test_loss, bleu_score, result = test(model, test_loader, loss_function)
+    test_loss, bleu_score, result = test(model, test_loader, mode='testing')
     # 儲存結果
     with open(f'./test_output.txt', 'w') as f:
         for line in result:
             print(line, file=f)
-
+            
     return test_loss, bleu_score
 
