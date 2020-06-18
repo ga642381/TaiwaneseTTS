@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from .config import configurations
-from .train import train_process
-from .train import test_process
-from .train import inference
+from config import configurations
+from train import train_process
+from train import test_process
+from train import inference
 
 config = configurations()
 
@@ -20,3 +20,6 @@ def translate_seq2seq(source):
     result = inference(config, source)
     print(result)
     return " ".join(result)
+
+if __name__ == '__main__':
+    train()

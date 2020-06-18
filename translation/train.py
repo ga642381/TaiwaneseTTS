@@ -16,9 +16,9 @@ import random
 import json
 
 
-from .model import save_model, load_model, build_model
-from .dataset import 華閩Dataset
-from .util import computebleu, schedule_sampling, tokens2sentence, infinite_iter
+from model import save_model, load_model, build_model
+from dataset import 華閩Dataset
+from util import computebleu, schedule_sampling, tokens2sentence, infinite_iter
 
 
 
@@ -102,12 +102,14 @@ def test(model, dataloader, mode):
             # 計算 Bleu Score
             bleu_score += computebleu(preds, targets)
             n += batch_size
-            return loss_sum / len(dataloader), bleu_score / n, result
 
         elif mode == 'deploy':
             preds = tokens2sentence(preds, dataloader.dataset.int2word_閩)
-            # return a list
-            return preds[0]
+    if mode == 'testing':
+        return loss_sum / len(dataloader), bleu_score / n, result
+    
+    elif mode == 'deploy':
+        return preds[0]
             
 
     
@@ -136,12 +138,12 @@ def train_process(config):
             model, optimizer, train_iter, loss_function, total_steps, config.summary_steps, train_dataset)
         train_losses += loss
         # 檢驗模型
-        val_loss, bleu_score, result = test(model, val_loader, loss_function)
+        val_loss, bleu_score, result = test(model, val_loader, "testing")
         val_losses.append(val_loss)
         bleu_scores.append(bleu_score)
 
         total_steps += config.summary_steps
-        print("\r", "val [{}] loss: {:.3f}, Perplexity: {:.3f}, blue score: {:.3f}       ".format(
+        print("\r", "val [{}] loss: {:.3f}, Perplexity: {:.3f}, bleu score: {:.3f}       ".format(
             total_steps, val_loss, np.exp(val_loss), bleu_score))
 
         # 儲存模型和結果
