@@ -71,7 +71,7 @@ def to_pingin(閩):
                 
         l = " ".join(join_elms)
         # char:
-        l = l.replace("-", " ")
+        l = l.replace("-", " - ")
         l = l + "\n"
         閩_tmp.append(l)
     return 閩_tmp

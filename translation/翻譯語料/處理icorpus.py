@@ -69,7 +69,7 @@ for i, l in enumerate(閩):
     if re.match(r'[0-9a-zA-z]', l[-2]):
         l= l.replace("\n", " .\n")
     
-    l = l.replace("-", " ")
+    l = l.replace("-", " - ")
     l = l.rstrip()
     
     閩[i] = l
