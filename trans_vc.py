@@ -16,7 +16,12 @@ class TransVC(QWidget):
         
         self.bridge = bridge
         
+        _id = QtGui.QFontDatabase.addApplicationFont("NotoSans/NotoSansCJKtc-Light.otf")
+        print(QtGui.QFontDatabase.applicationFontFamilies(_id))
+        font = QtGui.QFont("NotoSans")
+
         self.Chinese_text = QtWidgets.QPlainTextEdit()
+        self.Chinese_text.setFont(font)
         self.trans_button = QtWidgets.QPushButton()
         self.trans_button.clicked.connect(self.transOnClicked)
         self.text_1 = QtWidgets.QLineEdit()
@@ -46,6 +51,7 @@ class TransVC(QWidget):
     
     def translate_deep(self, text):
         拼音 = translate_seq2seq(text)
+        拼音 = 拼音.replace(" - ", "-")
         句物件 = 拆文分析器.建立句物件(拼音, 拼音)
         口語講法 = 台灣話口語講法(句物件)
         return 拼音, 口語講法
@@ -215,8 +221,7 @@ class TransVC(QWidget):
         self.verticalLayout_3.addLayout(self.verticalLayout_2)
         self.verticalLayout_3.setStretch(0, 1)
         self.verticalLayout_3.setStretch(1, 2)
-        
-        
+
         self.Chinese_text.setPlainText("最近肺炎很嚴重，記得戴口罩，常洗手。有病就要看醫生。")
         self.trans_button.setText("翻譯")
         self.label_1.setText("Seq")
