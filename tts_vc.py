@@ -4,6 +4,8 @@ from PyQt5.QtCore import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 import os
 
+from tts.gen_tacotron import TaiwaneseTacotron
+
 class TTSVC(QWidget):
     def __init__(self, bridge):
         super(QWidget, self).__init__()
@@ -20,6 +22,10 @@ class TTSVC(QWidget):
         
         self.setupFileListView()
         self.setupUi()
+        
+        os.chdir("tts")
+        self.TTS = TaiwaneseTacotron()
+        os.chdir("..")
         
     def setupFileListView(self):
         self.fileModel = QFileSystemModel()
@@ -41,10 +47,7 @@ class TTSVC(QWidget):
         
     def synsOnClicked(self):
         tts_input_text = self.IPA_text.toPlainText()
-        os.chdir("tts")
-        cmd = 'python ./gen_tacotron.py --input_text "{}" wavernn --batched'.format(tts_input_text)
-        os.system(cmd)
-        os.chdir("../")
+        self.TTS.generate(tts_input_text)
         
     def setupUi(self):
         self.setObjectName("tts_vc")

@@ -20,7 +20,7 @@ class LabelTransform(object):
 
 
 class 華閩Dataset(data.Dataset):
-    def __init__(self, root, max_output_len, mode, source=''):
+    def __init__(self, root, max_output_len, mode):
         self.root = root
         self.mode = mode
         self.word2int_華, self.int2word_華 = self.get_dictionary('華')
@@ -28,20 +28,22 @@ class 華閩Dataset(data.Dataset):
 
         # 載入資料
         self.data = []
-        if mode != "deploy":
+        if mode == 'deploy':
+            pass
+        
+        else :
             with open(os.path.join(self.root, f'{mode}.txt'), "r") as f:
                 for line in f:
                     self.data.append(line)
             print(f'{mode} dataset size: {len(self.data)}')
             
-        # if deploy then dataset is 華 sentence only! 
-        else:
-            self.data.append(source)
 
         self.華_vocab_size = len(self.word2int_華)
         self.閩_vocab_size = len(self.word2int_閩)
-        self.transform = LabelTransform(
-            max_output_len, self.word2int_華['<PAD>'])
+        self.transform = LabelTransform(max_output_len, self.word2int_華['<PAD>'])
+        
+    def replace_data(self, source:list):
+        self.data = source
 
     def get_dictionary(self, language):
         # 載入字典
@@ -76,7 +78,7 @@ class 華閩Dataset(data.Dataset):
 
         # 在開頭添加 <BOS>，在結尾添加 <EOS> ，不在字典的 subword (詞) 用 <UNK> 取代
         華, 閩 = [BOS], [BOS]
-        if self.mode!= "deploy":
+        if self.mode != "deploy":
             # 將句子拆解為 subword 並轉為整數
             sentence = re.split(' ', sentences[0])
             sentence = list(filter(None, sentence))
@@ -96,11 +98,9 @@ class 華閩Dataset(data.Dataset):
         else:
             sentence = re.split(' ', sentence)
             sentence = list(filter(None, sentence))
-            #print (f'en: {sentence}')
             for word in sentence:
                 華.append(self.word2int_華.get(word, UNK))
             華.append(EOS)
-            
             閩.append(EOS)
 
         華, 閩 = np.asarray(華), np.asarray(閩)

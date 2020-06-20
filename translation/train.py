@@ -20,11 +20,10 @@ from model import save_model, load_model, build_model
 from dataset import 華閩Dataset
 from util import computebleu, schedule_sampling, tokens2sentence, infinite_iter
 
+from config import configurations
 
 
-
-device = torch.device("cuda" if torch.cuda.is_available()
-                      else "cpu")  # 判斷是用 CPU 還是 GPU 執行運算
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # 判斷是用 CPU 還是 GPU 執行運算
 
 
 def train(model, optimizer, train_iter, loss_function, total_steps, summary_steps, train_dataset):
@@ -83,8 +82,9 @@ def test(model, dataloader, mode):
         '''
         
         batch_size = sources.size(0)
+        #print(sources)
         outputs, preds = model.inference(sources)
-        
+        #print(outputs, preds)
 
         if mode == 'testing':
             # targets 的第一個 token 是 <BOS> 所以忽略
@@ -105,6 +105,7 @@ def test(model, dataloader, mode):
 
         elif mode == 'deploy':
             preds = tokens2sentence(preds, dataloader.dataset.int2word_閩)
+            
     if mode == 'testing':
         return loss_sum / len(dataloader), bleu_score / n, result
     
@@ -116,14 +117,11 @@ def test(model, dataloader, mode):
 
 def train_process(config):
     # 準備訓練資料
-    train_dataset = 華閩Dataset(
-        config.data_path, config.max_output_len, 'training')
-    train_loader = data.DataLoader(
-        train_dataset, batch_size=config.batch_size, shuffle=True)
+    train_dataset = 華閩Dataset(config.data_path, config.max_output_len, 'training')
+    train_loader = data.DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     train_iter = infinite_iter(train_loader)
     # 準備檢驗資料
-    val_dataset = 華閩Dataset(
-        config.data_path, config.max_output_len, 'validation')
+    val_dataset = 華閩Dataset(config.data_path, config.max_output_len, 'validation')
     val_loader = data.DataLoader(val_dataset, batch_size=1)
     # 建構模型
     model, optimizer = build_model(
@@ -156,19 +154,6 @@ def train_process(config):
     return train_losses, val_losses, bleu_scores
 
 
-def inference(config, source):
-    test_dataset = 華閩Dataset(config.data_path, config.max_output_len, 'deploy', source)
-    test_loader = data.DataLoader(test_dataset, batch_size=1)
-    # 建構模型
-    model, optimizer = build_model(
-        config, test_dataset.華_vocab_size, test_dataset.閩_vocab_size, device)
-    print("Finish build model")
-    model.eval()
-    result = test(model, test_loader, mode='deploy')
-    return result
-    
-    
-    
 def test_process(config):
     # 準備測試資料
     test_dataset = 華閩Dataset(config.data_path, config.max_output_len, 'testing')
@@ -186,4 +171,27 @@ def test_process(config):
             print(line, file=f)
             
     return test_loss, bleu_score
+
+
+class Inference():
+    def __init__(self):
+        self.config = configurations()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.test_dataset = 華閩Dataset(self.config.data_path, self.config.max_output_len, 'deploy')
+        self.model, _ = build_model(self.config, self.test_dataset.華_vocab_size, self.test_dataset.閩_vocab_size, self.device)
+        self.model.eval()
+        print("Model built")
+    
+    def predict(self, source):
+        source = source.rstrip()
+        source = " ".join(source)
+        self.test_dataset.replace_data([source])
+        test_loader = data.DataLoader(self.test_dataset, batch_size=1)
+        result = test(self.model, test_loader, mode='deploy')
+        result = " ".join(result)
+        result = result.replace(" - ", "-")
+        return result
+    
+    
+
 

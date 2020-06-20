@@ -2,13 +2,16 @@ import os
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QLabel
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui, QtWidgets
-from translation.main import translate_seq2seq
+
 from 臺灣言語工具.解析整理.拆文分析器 import 拆文分析器
 from 臺灣言語工具.斷詞.國教院斷詞用戶端 import 國教院斷詞用戶端
 from 臺灣言語工具.翻譯.摩西工具.摩西服務端 import 摩西服務端
 from 臺灣言語工具.翻譯.摩西工具.摩西用戶端 import 摩西用戶端
 from 臺灣言語工具.翻譯.摩西工具.語句編碼器 import 語句編碼器
 from 臺灣言語工具.語音合成 import 台灣話口語講法
+import sys
+sys.path.append("./translation")
+from translation.train import Inference
 
 class TransVC(QWidget):
     def __init__(self, bridge):
@@ -32,6 +35,10 @@ class TransVC(QWidget):
         self.setupUi()
         self.setupDocker()
         
+        os.chdir("translation")
+        self.Seq2Seq = Inference()
+        os.chdir("..")
+        
     def setupDocker(self):
         #TODO log
         '''
@@ -50,8 +57,7 @@ class TransVC(QWidget):
         self.client.containers.get("huatai").stop()
     
     def translate_deep(self, text):
-        拼音 = translate_seq2seq(text)
-        拼音 = 拼音.replace(" - ", "-")
+        拼音 = self.Seq2Seq.predict(text)
         句物件 = 拆文分析器.建立句物件(拼音, 拼音)
         口語講法 = 台灣話口語講法(句物件)
         return 拼音, 口語講法
@@ -67,7 +73,6 @@ class TransVC(QWidget):
     
     def transOnClicked(self):
         # translate
-        os.chdir("translation")
         Chinese_text = self.Chinese_text.toPlainText()
         self.華語斷詞句物件, self.台語句物件, self.口語講法 = self.translate(Chinese_text)
         self.台語Seq2Seq, self.台語IPA = self.translate_deep(Chinese_text)
@@ -83,7 +88,6 @@ class TransVC(QWidget):
         # send IPA text to tts_widget
         #self.bridge.sendSignal(self.IPA_text.text())
         self.bridge.sendSignal(self.text_2.text())
-        os.chdir("..")
         
         
     def setupUi(self):

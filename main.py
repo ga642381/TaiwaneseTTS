@@ -1,5 +1,6 @@
 import sys
-sys.path.append("./translation")
+#sys.path.append("./translation")
+#ssys.path.append("./tts")
 from PyQt5 import QtWidgets
 from main_window import MainWindow
 
