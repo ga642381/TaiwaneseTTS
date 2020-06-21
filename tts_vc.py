@@ -46,14 +46,16 @@ class TTSVC(QWidget):
         soundwav = pygame.mixer.Sound("./output/{}".format(wav_name))
         print(wav_name)
         soundwav.play()
-        #os.system("sox ./output/'{}'".format(wav_name))
         
     def getIPAtext(self):
         self.IPA_text.setPlainText(self.bridge.IPA_text)
         
     def synsOnClicked(self):
-        tts_input_text = self.IPA_text.toPlainText()
-        self.TTS.generate(tts_input_text)
+        IPA = self.IPA_text.toPlainText()
+        華 = self.bridge.華_text
+        print(華)
+        print(IPA)
+        self.TTS.generate(華, IPA)
         
     def setupUi(self):
         self.setObjectName("tts_vc")

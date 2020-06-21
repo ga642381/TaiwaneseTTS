@@ -104,10 +104,12 @@ class Bridge(QObject):
     valueUpdated = pyqtSignal()
     def __init__(self):
         super().__init__()
+        self.華_text = ""
         self.IPA_text = ""
         
-    def sendSignal(self, text):
-        self.IPA_text = text
+    def sendSignal(self, text_華, text_IPA):
+        self.華_text = text_華
+        self.IPA_text = text_IPA
         self.valueUpdated.emit()
     
 if __name__ == "__main__":

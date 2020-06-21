@@ -120,7 +120,7 @@ class TaiwaneseTacotron():
                         ('GL Iters', self.args.iters)])
         
         
-    def generate(self, input_text):
+    def generate(self, 華, input_text):
         inputs = [text_to_sequence(input_text.strip(), hp.tts_cleaner_names)]
         
         for i, x in enumerate(inputs, 1):
@@ -145,7 +145,11 @@ class TaiwaneseTacotron():
                     output_name_list.append(s)
                 else:
                     break
-            output_name = " ".join(output_name_list)
+            if len(華) <= 9:
+                output_name = 華[:-1]
+            else:
+                output_name = 華[:8]
+                
             save_path = "output/{}.wav".format(output_name)
                 
             if self.args.vocoder == 'wavernn':
