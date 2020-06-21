@@ -84,7 +84,7 @@ class TransVC(QWidget):
         self.摩西_台羅.setText(self.台語句物件.看音())
         self.摩西_IPA.setText(self.口語講法)
         
-        self.bridge.sendSignal(Chinese_text, self.Deep_IPA.text())
+        self.bridge.sendSignal(Chinese_text, self.摩西_IPA.text())
         
         
     def setupUi(self):
@@ -223,7 +223,7 @@ class TransVC(QWidget):
         self.verticalLayout_3.setStretch(0, 1)
         self.verticalLayout_3.setStretch(1, 2)
 
-        self.Chinese_text.setPlainText("最近肺炎很嚴重，記得戴口罩，常洗手。有病就要看醫生。")
+        self.Chinese_text.setPlainText("歡迎來到台大語音處理實驗室。")
         self.trans_button.setText("翻譯")
         self.label_1.setText("Seq")
         self.label_2.setText("IPA")

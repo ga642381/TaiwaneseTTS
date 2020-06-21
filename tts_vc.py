@@ -51,6 +51,7 @@ class TTSVC(QWidget):
         self.IPA_text.setPlainText(self.bridge.IPA_text)
         
     def synsOnClicked(self):
+        
         IPA = self.IPA_text.toPlainText()
         華 = self.bridge.華_text
         print(華)
