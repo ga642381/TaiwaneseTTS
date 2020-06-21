@@ -20,7 +20,6 @@ class TransVC(QWidget):
         self.bridge = bridge
         
         _id = QtGui.QFontDatabase.addApplicationFont("NotoSans/NotoSansCJKtc-Light.otf")
-        print(QtGui.QFontDatabase.applicationFontFamilies(_id))
         font = QtGui.QFont("NotoSans")
 
         self.Chinese_text = QtWidgets.QPlainTextEdit()
