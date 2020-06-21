@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 import os
-
+import sys
+sys.path.append("./tts")
 from tts.gen_tacotron import TaiwaneseTacotron
 
 class TTSVC(QWidget):
@@ -22,11 +23,9 @@ class TTSVC(QWidget):
         
         self.setupFileListView()
         self.setupUi()
-        
         os.chdir("tts")
         self.TTS = TaiwaneseTacotron()
         os.chdir("..")
-        
     def setupFileListView(self):
         self.fileModel = QFileSystemModel()
         self.fileModel.setFilter(QDir.NoDotAndDotDot |  QDir.Files) 

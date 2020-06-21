@@ -5,8 +5,7 @@ from pathlib import Path
 class Paths:
     """Manages and configures the paths used by WaveRNN, Tacotron, and the data."""
     def __init__(self, data_path, voc_id, tts_id):
-        self.base = Path(__file__).parent.parent.expanduser().resolve()
-
+        self.base = Path(__file__).parent.parent.parent.expanduser().resolve()
         # Data Paths
         self.data = Path(data_path).expanduser().resolve()
         self.quant = self.data/'quant'
@@ -34,7 +33,7 @@ class Paths:
         self.create_paths()
 
     def create_paths(self):
-        print(self.data)
+        #print(self.data)
         os.makedirs(self.data, exist_ok=True)
         os.makedirs(self.quant, exist_ok=True)
         os.makedirs(self.mel, exist_ok=True)

@@ -1,22 +1,25 @@
 import numpy as np
 import torch
+import os 
+import argparse
+
+from models.tacotron import Tacotron
 from models.fatchord_version import WaveRNN
 
 from utils.text.symbols import symbols
 from utils.paths import Paths
-from models.tacotron import Tacotron
-import argparse
+
 from utils.text import text_to_sequence
 from utils.display import save_attention, simple_table
 from utils.dsp import reconstruct_waveform, save_wav
 
 
-#from utils import hparams as hp
-import hparams as hp
+from utils import hparams as hp
+#import hparams as hp
 
 class TaiwaneseTacotron():
     def __init__(self):
-        # Parse Arguments\
+        # Parse Arguments
         parser = argparse.ArgumentParser(description='TTS')
         self.args = parser.parse_args()
         self.args.vocoder = 'wavernn'
@@ -36,7 +39,7 @@ class TaiwaneseTacotron():
         else:
             raise argparse.ArgumentError('Must provide a valid vocoder type!')
             
-        #hp.configure(self.args.hp_file)  # Load hparams from file
+        hp.configure(self.args.hp_file)  # Load hparams from file
         
         # set defaults for any arguments that depend on hparams
         if self.args.vocoder == 'wavernn':
@@ -49,6 +52,8 @@ class TaiwaneseTacotron():
         
         #================ others ================#
         paths = Paths(hp.data_path, hp.voc_model_id, hp.tts_model_id)
+        print("hello")
+        print(paths.base)
         if not self.args.force_cpu and torch.cuda.is_available():
             device = torch.device('cuda')
         else:
@@ -73,6 +78,7 @@ class TaiwaneseTacotron():
                                 mode=hp.voc_mode).to(device)
     
             voc_load_path = self.args.voc_weights if self.args.voc_weights else paths.voc_latest_weights
+            #print(paths.voc_latest_weights)
             self.voc_model.load(voc_load_path)
     
         #TACOTRON
