@@ -10,8 +10,8 @@ from 臺灣言語工具.翻譯.摩西工具.摩西用戶端 import 摩西用戶�
 from 臺灣言語工具.翻譯.摩西工具.語句編碼器 import 語句編碼器
 from 臺灣言語工具.語音合成 import 台灣話口語講法
 import sys
-sys.path.append("./translation")
-from translation.train import Inference
+from translation.Allennlp.translation_api import TranslationAPI
+from translation.RNN.train import Inference
 
 class TransVC(QWidget):
     def __init__(self, bridge):
@@ -34,9 +34,10 @@ class TransVC(QWidget):
         self.setupUi()
         self.setupDocker()
         
-        os.chdir("translation")
-        self.Seq2Seq = Inference()
-        os.chdir("..")
+        #self.Seq2seq = Inference()
+        self.TransAPI = TranslationAPI('transformer')
+        
+        
         
     def setupDocker(self):
         #TODO log
@@ -56,7 +57,8 @@ class TransVC(QWidget):
         self.client.containers.get("huatai").stop()
     
     def translate_deep(self, text):
-        拼音 = self.Seq2Seq.predict(text)
+        #拼音 = self.Seq2Seq.predict(text)
+        拼音 = self.TransAPI.translate(text)
         句物件 = 拆文分析器.建立句物件(拼音, 拼音)
         口語講法 = 台灣話口語講法(句物件)
         return 拼音, 口語講法
@@ -84,8 +86,8 @@ class TransVC(QWidget):
         self.摩西_台羅.setText(self.台語句物件.看音())
         self.摩西_IPA.setText(self.口語講法)
         
-        self.bridge.sendSignal(Chinese_text, self.摩西_IPA.text())
-        
+        #self.bridge.sendSignal(Chinese_text, self.摩西_IPA.text())
+        self.bridge.sendSignal(Chinese_text, self.Deep_IPA.text())
         
     def setupUi(self):
         self.setObjectName("trans_vc")

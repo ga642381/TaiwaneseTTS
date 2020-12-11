@@ -4,3 +4,5 @@ ckpt/
 model_outputs/
 *_back
 output/
+*.tar.gz
+

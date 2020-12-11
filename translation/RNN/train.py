@@ -16,11 +16,10 @@ import random
 import json
 
 
-from model import save_model, load_model, build_model
-from dataset import 華閩Dataset
-from util import computebleu, schedule_sampling, tokens2sentence, infinite_iter
-
-from config import configurations
+from .model import save_model, load_model, build_model
+from .dataset import 華閩Dataset
+from .util import computebleu, schedule_sampling, tokens2sentence, infinite_iter
+from .config import configurations
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # 判斷是用 CPU 還是 GPU 執行運算
