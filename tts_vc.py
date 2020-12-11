@@ -5,9 +5,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import os
 import sys
 
-import pygame
-pygame.init()
-pygame.mixer.init()
+#import pygame
+#pygame.init()
+#pygame.mixer.init()
 
 sys.path.append("./tts")
 from tts.gen_tacotron import TaiwaneseTacotron
@@ -43,9 +43,9 @@ class TTSVC(QWidget):
     def onListViewClicked(self):
         selected_model_index = self.listView.selectedIndexes()[0]
         wav_name = self.fileModel.fileName(selected_model_index)
-        soundwav = pygame.mixer.Sound("./output/{}".format(wav_name))
-        print(wav_name)
-        soundwav.play()
+        #soundwav = pygame.mixer.Sound("./output/{}".format(wav_name))
+        #print(wav_name)
+        #soundwav.play()
         
     def getIPAtext(self):
         self.IPA_text.setPlainText(self.bridge.IPA_text)
