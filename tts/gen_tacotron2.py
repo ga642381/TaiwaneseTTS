@@ -1,14 +1,34 @@
 import torch
 from models.wavernn import WaveRNN
+from models.tacotron2 import Tacotron2
 from utils import hparams as hp
 from utils.text.symbols import symbols
 from utils.paths import Paths
-from models.tacotron import Tacotron
+
 import argparse
 from utils.text import text_to_sequence
 from utils.display import save_attention, simple_table
 from utils.dsp import reconstruct_waveform, save_wav
 import numpy as np
+
+def gen_samples(tts_model, sample_set, paths, vocoder='griffinlim'):
+    tts_model.eval()
+    tts_k = tts_model.get_step() // 1000
+
+    for i, batch in enumerate(sample_set, 1):
+        text, mel, item_id = batch
+        text = text.long().cuda()
+
+        mel_outputs, mel_outputs_postnet, _, alignments = tts_model.inference(text)
+
+        if vocoder == 'griffinlim':
+            m = torch.squeeze(mel_outputs_postnet).detach().cpu().numpy()
+            wav = reconstruct_waveform(m, n_iter=32)
+            save_path = paths.tts_samples/f'{i}_griffinlim_{tts_k}k.wav'
+            save_wav(wav, save_path)
+        
+    tts_model.train()
+
 
 if __name__ == "__main__":
 
@@ -72,6 +92,8 @@ if __name__ == "__main__":
         device = torch.device('cpu')
     print('Using device:', device)
 
+
+    # === WaveRNN === #
     if args.vocoder == 'wavernn':
         print('\nInitialising WaveRNN Model...\n')
         # Instantiate WaveRNN Model
@@ -93,36 +115,25 @@ if __name__ == "__main__":
 
     print('\nInitialising Tacotron Model...\n')
 
+    # === Tacotron2 === #
     # Instantiate Tacotron Model
-    tts_model = Tacotron(embed_dims=hp.tts_embed_dims,
-                         num_chars=len(symbols),
-                         encoder_dims=hp.tts_encoder_dims,
-                         decoder_dims=hp.tts_decoder_dims,
-                         n_mels=hp.num_mels,
-                         fft_bins=hp.num_mels,
-                         postnet_dims=hp.tts_postnet_dims,
-                         encoder_K=hp.tts_encoder_K,
-                         lstm_dims=hp.tts_lstm_dims,
-                         postnet_K=hp.tts_postnet_K,
-                         num_highways=hp.tts_num_highways,
-                         dropout=hp.tts_dropout,
-                         stop_threshold=hp.tts_stop_threshold).to(device)
-
+    tts_model = Tacotron2().to(device)
     tts_load_path = tts_weights if tts_weights else paths.tts_latest_weights
     tts_model.load(tts_load_path)
 
+    # === Text === #
     if input_text:
-        inputs = [text_to_sequence(input_text.strip(), hp.tts_cleaner_names)]
+        inputs = [text_to_sequence(input_text.strip(), hp.text_cleaners)]
     else:
         with open('sentences.txt') as f:
-            inputs = [text_to_sequence(l.strip(), hp.tts_cleaner_names) for l in f]
+            inputs = [text_to_sequence(l.strip(), hp.text_cleaners) for l in f]
 
+    # === Infomation === #
     if args.vocoder == 'wavernn':
         voc_k = voc_model.get_step() // 1000
         tts_k = tts_model.get_step() // 1000
 
-        simple_table([('Tacotron', str(tts_k) + 'k'),
-                    ('r', tts_model.r),
+        simple_table([('Tacotron2', str(tts_k) + 'k'),
                     ('Vocoder Type', 'WaveRNN'),
                     ('WaveRNN', str(voc_k) + 'k'),
                     ('Generation Mode', 'Batched' if batched else 'Unbatched'),
@@ -131,19 +142,20 @@ if __name__ == "__main__":
 
     elif args.vocoder == 'griffinlim':
         tts_k = tts_model.get_step() // 1000
-        simple_table([('Tacotron', str(tts_k) + 'k'),
-                    ('r', tts_model.r),
+        simple_table([('Tacotron2', str(tts_k) + 'k'),
                     ('Vocoder Type', 'Griffin-Lim'),
                     ('GL Iters', args.iters)])
 
+    # === Generate === #
     for i, x in enumerate(inputs, 1):
-
         print(f'\n| Generating {i}/{len(inputs)}')
-        _, m, attention = tts_model.generate(x)
-        # Fix mel spectrogram scaling to be from 0 to 1
-        m = (m + 4) / 8
-        np.clip(m, 0, 1, out=m)
+        print(x)
 
+        x = np.array(x)[None, :]
+        x = torch.autograd.Variable(torch.from_numpy(x)).cuda().long()
+        
+        tts_model.eval()
+        mel_outputs, mel_outputs_postnet, _, alignments = tts_model.inference(x)
         if args.vocoder == 'griffinlim':
             v_type = args.vocoder
         elif args.vocoder == 'wavernn' and args.batched:
@@ -159,9 +171,10 @@ if __name__ == "__main__":
         if save_attn: save_attention(attention, save_path)
 
         if args.vocoder == 'wavernn':
-            m = torch.tensor(m).unsqueeze(0)
+            m = mel_outputs_postnet
             voc_model.generate(m, save_path, batched, hp.voc_target, hp.voc_overlap, hp.mu_law)
         elif args.vocoder == 'griffinlim':
+            m = torch.squeeze(mel_outputs_postnet).detach().cpu().numpy()
             wav = reconstruct_waveform(m, n_iter=args.iters)
             save_wav(wav, save_path)
 

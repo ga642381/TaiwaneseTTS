@@ -5,12 +5,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import os
 import sys
 
-#import pygame
-#pygame.init()
-#pygame.mixer.init()
-
 sys.path.append("./tts")
-from tts.gen_tacotron import TaiwaneseTacotron
+from tts.gen_tts import TaiwaneseTacotron
 
 class TTSVC(QWidget):
     def __init__(self, bridge):

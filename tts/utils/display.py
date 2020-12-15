@@ -82,11 +82,18 @@ def time_since(started):
 
 
 def save_attention(attn, path):
-    fig = plt.figure(figsize=(12, 6))
-    plt.imshow(attn.T, interpolation='nearest', aspect='auto')
+    #fig = plt.figure(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(12, 6))
+    im = ax.imshow(attn.T, aspect='auto', origin='lower',interpolation='nearest')
+    fig.colorbar(im, ax=ax)
+    plt.tight_layout()
+    fig.canvas.draw()
     fig.savefig(path.parent/f'{path.stem}.png', bbox_inches='tight')
-    plt.close(fig)
-
+    
+    #plt.imshow(attn.T, interpolation='nearest', aspect='auto', origin='lower')
+    #fig.savefig(path.parent/f'{path.stem}.png', bbox_inches='tight')
+    #plt.close(fig)
+    plt.close()
 
 def save_spectrogram(M, path, length=None):
     M = np.flip(M, axis=0)

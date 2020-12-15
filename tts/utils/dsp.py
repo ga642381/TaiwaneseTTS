@@ -4,8 +4,10 @@ import librosa
 import soundfile
 from utils import hparams as hp
 from scipy.signal import lfilter
-
-
+"""
+librosa   load    # 2020.12.06 test Librosa   version 0.8.0 -> [-1, +1]
+soundfile save    # 2020.12.06 test soundfile version 0.10.3
+"""
 
 def label_2_float(x, bits):
     return 2 * x / (2**bits - 1.) - 1.
@@ -18,13 +20,14 @@ def float_2_label(x, bits):
 
 
 def load_wav(path):
+    # librosa load -> [wav, sample_rate]
     return librosa.load(path, sr=hp.sample_rate)[0]
 
 
 def save_wav(x, path):
-    #librosa.output.write_wav(path, x.astype(np.float32), sr=hp.sample_rate)
-    print("SAVE: ", path)
+    # [-1, +1] -> wav
     soundfile.write(path, x.astype(np.float32), hp.sample_rate)
+
 
 def split_signal(x):
     unsigned = x + 2**15
@@ -42,6 +45,7 @@ def encode_16bits(x):
 
 
 def linear_to_mel(spectrogram):
+    # we define the mel number here
     return librosa.feature.melspectrogram(
         S=spectrogram, sr=hp.sample_rate, n_fft=hp.n_fft, n_mels=hp.num_mels, fmin=hp.fmin)
 
@@ -71,7 +75,7 @@ def spectrogram(y):
     S = amp_to_db(np.abs(D)) - hp.ref_level_db
     return normalize(S)
 
-
+# call this function
 def melspectrogram(y):
     D = stft(y)
     S = amp_to_db(linear_to_mel(np.abs(D)))

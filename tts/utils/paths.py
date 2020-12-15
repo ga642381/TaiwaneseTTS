@@ -5,13 +5,12 @@ from pathlib import Path
 class Paths:
     """Manages and configures the paths used by WaveRNN, Tacotron, and the data."""
     def __init__(self, data_path, voc_id, tts_id):
-        #self.base = Path(__file__).parent.parent.parent.expanduser().resolve()
-        self.base = Path(os.getcwd())
+        self.base = Path(__file__).parent.parent.parent.expanduser().resolve()
         # Data Paths
         self.data = Path(data_path).expanduser().resolve()
         self.quant = self.data/'quant'
-        self.mel = self.data/'mel'
-        self.gta = self.data/'gta'
+        self.mel   = self.data/'mel'
+        self.gta   = self.data/'gta'
 
         # WaveRNN/Vocoder Paths
         self.voc_checkpoints = self.base/'checkpoints'/f'{voc_id}.wavernn'
@@ -20,6 +19,7 @@ class Paths:
         self.voc_output = self.base/'model_outputs'/f'{voc_id}.wavernn'
         self.voc_step = self.voc_checkpoints/'step.npy'
         self.voc_log = self.voc_checkpoints/'log.txt'
+        self.voc_tensorboard = self.voc_checkpoints/'log'
 
         # Tactron/TTS Paths
         self.tts_checkpoints = self.base/'checkpoints'/f'{tts_id}.tacotron'
@@ -30,18 +30,22 @@ class Paths:
         self.tts_log = self.tts_checkpoints/'log.txt'
         self.tts_attention = self.tts_checkpoints/'attention'
         self.tts_mel_plot = self.tts_checkpoints/'mel_plots'
+        self.tts_tensorboard = self.tts_checkpoints/'log'
+        self.tts_samples= self.tts_checkpoints/'sample'
 
         self.create_paths()
 
     def create_paths(self):
-        #print(self.data)
         os.makedirs(self.data, exist_ok=True)
         os.makedirs(self.quant, exist_ok=True)
         os.makedirs(self.mel, exist_ok=True)
         os.makedirs(self.gta, exist_ok=True)
         os.makedirs(self.voc_checkpoints, exist_ok=True)
+        os.makedirs(self.voc_tensorboard, exist_ok=True)
         os.makedirs(self.voc_output, exist_ok=True)
         os.makedirs(self.tts_checkpoints, exist_ok=True)
+        os.makedirs(self.tts_tensorboard, exist_ok=True)
+        os.makedirs(self.tts_samples, exist_ok=True)
         os.makedirs(self.tts_output, exist_ok=True)
         os.makedirs(self.tts_attention, exist_ok=True)
         os.makedirs(self.tts_mel_plot, exist_ok=True)

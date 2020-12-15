@@ -231,6 +231,6 @@ class TransVC(QWidget):
         self.label_2.setText("IPA")
         self.label_3.setText("摩西")
         self.IPA_label.setText("IPA")
-        
+
         QtCore.QMetaObject.connectSlotsByName(self)
 

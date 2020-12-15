@@ -11,17 +11,30 @@ class TranslationAPI():
         self.model = model
         self.this_path = pathlib.Path(__file__).parent.absolute()
         self.model_dir = os.path.join(self.this_path, 'model')
+        self.start_allen_server()
         
     def start_allen_server(self):
         if self.model == 'transformer':
             model_name = 'bert_transformer'
             model_path = os.path.join(self.model_dir, f'{model_name}.tar.gz')
         
-        cmd = f'allennlp serve --archive-path {model_path} --predictor seq2seq --field-name source'
-        #self.proc = subprocess.Popen(cmd, stdout=PIPE, stderr=STDOUT,
-        #                        universal_newlines=True, 
-        #                        shell=True)
-        self.proc = subprocess.Popen(cmd, shell=True)        
+        port = 8000
+        port_using = self.check_port_usage(port)
+        if port_using:
+            print(f"port {port} is using...")
+        else:
+            print(f"Starting Allennlp server on port {port}")
+            cmd = f'allennlp serve --archive-path {model_path} --predictor seq2seq --field-name source'
+            self.proc = subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+    
+    def check_port_usage(self, port):
+        cmd = f"fuser {port}/tcp"
+        std_out = subprocess.run(cmd, capture_output=True, shell=True)
+        if std_out:
+            return True
+        else:
+            return False
+
     def translate(self, txt):
         url = "http://127.0.0.1:8000/predict"
         req_data = {"source":txt}

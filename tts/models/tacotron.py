@@ -364,7 +364,8 @@ class Tacotron(nn.Module):
         # For easy visualisation
         attn_scores = torch.cat(attn_scores, 1)
         # attn_scores = attn_scores.cpu().data.numpy()
-
+        
+        # !!!!!!!!!!!!!!both mel_outputs and linaer are 80 dims !!!!!!!!!!!!!!!!!!
         return mel_outputs, linear, attn_scores
 
     def generate(self, x, steps=2000):
